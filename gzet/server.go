@@ -38,9 +38,11 @@ func (s *Server) Start() {
 				for {
 					buf := make([]byte, 1024)
 					count, err := conn.Read(buf)
-					if err == nil {
-						fmt.Println(count)
+					if err != nil {
+						fmt.Sprintf("Read error %s", err)
 					}
+
+					fmt.Sprintf("Read from client:%s,%d", buf, count)
 
 					if _, err := conn.Write(buf[:count]); err != nil {
 						fmt.Println("Write error!")
