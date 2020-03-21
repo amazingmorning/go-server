@@ -1,10 +1,10 @@
 package main
 
 import (
-	"go-server/gzet"
+	"go-server/gnet"
 )
 
 func main() {
-	s := gzet.NewServer("first-server")
+	s := gnet.NewServer("first-server")
 	s.Serve()
 }
