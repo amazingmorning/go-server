@@ -8,4 +8,6 @@ type IServer interface {
 	Stop()
 	//开启业务服务方法
 	Serve()
+	//添加处理函数的路由
+	AddRouter(IRouter)
 }
