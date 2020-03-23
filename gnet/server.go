@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go-server/gface"
+	"go-server/utils"
 	"net"
 	"time"
 )
@@ -37,7 +38,11 @@ func CallBackToClient(conn *net.TCPConn, data []byte, cnt int) error {
 
 //开启网络服务
 func (s *Server) Start() {
-	fmt.Printf("[START] Server listenner at IP: %s, Port %d, is starting\n", s.IP, s.Port)
+	fmt.Printf("[START] Server name: %s,listenner at IP: %s, Port %d is starting\n", s.Name, s.IP, s.Port)
+    fmt.Printf("[Zinx] Version: %s, MaxConn: %d,  MaxPacketSize: %d\n",
+        utils.GlobalObject.Version,
+        utils.GlobalObject.MaxConn,
+        utils.GlobalObject.MaxPacketSize)
 
 	//开启一个go去做服务端Linster业务
 	go func() {
@@ -111,10 +116,10 @@ func (s *Server) AddRouter(router gface.IRouter) {
 */
 func NewServer(name string) gface.IServer {
 	s := &Server{
-		Name:      name,
+		Name:      utils.GlobalObject.Name,
 		IPVersion: "tcp4",
-		IP:        "0.0.0.0",
-		Port:      9898,
+		IP:        utils.GlobalObject.Host,
+		Port:      utils.GlobalObject.TcpPort,
 		Router:    nil,
 	}
 
