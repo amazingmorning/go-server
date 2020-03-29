@@ -19,8 +19,8 @@ type Server struct {
 	IP string
 	//服务绑定的端口
 	Port int
-	//当前Server由用户绑定的回调router,也就是Server注册的链接对应的处理业务
-	Router gface.IRouter
+	//当前Server的消息管理模块，用来绑定MsgId和对应的处理方法
+	msgHandler gface.IMsgHandle
 }
 
 //============== 定义当前客户端链接的handle api ===========
@@ -39,10 +39,10 @@ func CallBackToClient(conn *net.TCPConn, data []byte, cnt int) error {
 //开启网络服务
 func (s *Server) Start() {
 	fmt.Printf("[START] Server name: %s,listenner at IP: %s, Port %d is starting\n", s.Name, s.IP, s.Port)
-    fmt.Printf("[Zinx] Version: %s, MaxConn: %d,  MaxPacketSize: %d\n",
-        utils.GlobalObject.Version,
-        utils.GlobalObject.MaxConn,
-        utils.GlobalObject.MaxPacketSize)
+	fmt.Printf("[Zinx] Version: %s, MaxConn: %d,  MaxPacketSize: %d\n",
+		utils.GlobalObject.Version,
+		utils.GlobalObject.MaxConn,
+		utils.GlobalObject.MaxPacketSize)
 
 	//开启一个go去做服务端Linster业务
 	go func() {
@@ -79,7 +79,7 @@ func (s *Server) Start() {
 			//3.2 TODO Server.Start() 设置服务器最大连接控制,如果超过最大连接，那么则关闭此新的连接
 
 			//3.3 处理该新连接请求的 业务 方法， 此时应该有 handler 和 conn是绑定的
-			dealConn := NewConnection(conn, cid, s.Router)
+			dealConn := NewConnection(conn, cid, s.msgHandler)
 			cid++
 
 			//3.4 启动当前链接的处理业务
@@ -105,22 +105,22 @@ func (s *Server) Serve() {
 	}
 }
 
-func (s *Server) AddRouter(router gface.IRouter) {
-	s.Router = router
+func (s *Server) AddRouter(msgId uint32, router gface.IRouter) {
+	s.msgHandler.AddRouter(msgId, router)
 
-	fmt.Println("Add Router succ! ")
+	fmt.Sprintf("Add %s Router succ! ", string(msgId))
 }
 
 /*
   创建一个服务器句柄
 */
-func NewServer(name string) gface.IServer {
+func NewServer() gface.IServer {
 	s := &Server{
-		Name:      utils.GlobalObject.Name,
-		IPVersion: "tcp4",
-		IP:        utils.GlobalObject.Host,
-		Port:      utils.GlobalObject.TcpPort,
-		Router:    nil,
+		Name:       utils.GlobalObject.Name,
+		IPVersion:  "tcp4",
+		IP:         utils.GlobalObject.Host,
+		Port:       utils.GlobalObject.TcpPort,
+		msgHandler: NewMsgHandle(),
 	}
 
 	return s
